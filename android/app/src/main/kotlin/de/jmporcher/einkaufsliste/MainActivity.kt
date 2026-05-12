@@ -1,4 +1,4 @@
-package com.example.einkaufsliste
+package de.jmporcher.einkaufsliste
 
 import io.flutter.embedding.android.FlutterActivity
 import android.os.Bundle
