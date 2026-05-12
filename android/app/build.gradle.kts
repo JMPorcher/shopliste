@@ -9,12 +9,15 @@ plugins {
 }
 
 val keystoreProperties = Properties()
-val keysFolder = File(System.getProperty("user.home"), "Documents/AndroidKeys/Einkaufsliste")
-// BEHOBEN 1: Diese Zeile hat gefehlt, damit Gradle weiß, wonach es sucht
+val keysFolder = File(System.getProperty("user.home"), "Documents/AndroidKeys/Einkaufsliste/android")
+
 val keystorePropertiesFile = File(keysFolder, "key.properties")
 
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    println("✅ Key-Properties erfolgreich geladen aus: ${keystorePropertiesFile.absolutePath}")
+} else {
+    println("❌ FEHLER: key.properties nicht gefunden in: ${keystorePropertiesFile.absolutePath}")
 }
 
 android {
@@ -41,13 +44,20 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
-            storePassword = keystoreProperties["storePassword"] as String?
+            // Wir lesen die Werte explizit aus und werfen einen Fehler, falls einer fehlt
+            val alias = keystoreProperties.getProperty("keyAlias")
+            val sPw = keystoreProperties.getProperty("storePassword")
+            val kPw = keystoreProperties.getProperty("keyPassword")
+            val sFile = keystoreProperties.getProperty("storeFile")
 
-            // BEHOBEN 2: Holt die Keystore-Datei jetzt direkt aus deinem Dokumente-Ordner
-            val storeFileName = keystoreProperties["storeFile"] as String?
-            storeFile = storeFileName?.let { File(keysFolder, it) }
+            if (alias != null && sPw != null && kPw != null && sFile != null) {
+                keyAlias = alias
+                keyPassword = kPw
+                storePassword = sPw
+                storeFile = File(keysFolder, sFile)
+            } else {
+                println("WARNUNG: Key-Properties konnten nicht vollständig geladen werden!")
+            }
         }
     }
 
