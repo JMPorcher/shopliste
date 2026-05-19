@@ -1,4 +1,4 @@
-name: einkaufsliste
+name: shopliste
 description: "Google Assistant activated shopping list"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 

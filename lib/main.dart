@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Wichtig für den MethodChannel
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:app_links/app_links.dart';
 import 'dart:async';
 
 void main() async {
@@ -10,16 +10,16 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const EinkaufslisteApp());
+  runApp(const ShoplisteApp());
 }
 
-class EinkaufslisteApp extends StatelessWidget {
-  const EinkaufslisteApp({super.key});
+class ShoplisteApp extends StatelessWidget {
+  const ShoplisteApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Einkaufsliste',
+      title: 'Shopliste',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -38,43 +38,29 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late AppLinks _appLinks;
-  StreamSubscription<Uri>? _linkSubscription;
-
-  void _initDeepLinks() async {
-    _appLinks = AppLinks();
-    final initialUri = await _appLinks.getInitialLink();
-    if (initialUri != null) {
-      _handleIncomingLink(initialUri);
-    }
-
-    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-      _handleIncomingLink(uri);
-    });
-  }
+  // Kanal zur Android-Ebene
+  static const platform = MethodChannel('de.jmporcher.shopliste/data');
 
   @override
   void initState() {
     super.initState();
-    _initDeepLinks();
+    // Prüft direkt beim Start, ob Google Assistant ein Extra mitgegeben hat
+    _checkAndroidExtras();
   }
 
-  @override
-  void dispose() {
-    _linkSubscription?.cancel();
-    super.dispose();
-  }
-
-  void _handleIncomingLink(Uri uri) {
-    if (uri.scheme == 'einkaufsliste' && uri.host == 'add') {
-      final itemName = uri.queryParameters['item'];
-
+  Future<void> _checkAndroidExtras() async {
+    try {
+      final String? itemName = await platform.invokeMethod('getSharedData');
       if (itemName != null && itemName.isNotEmpty) {
         DatabaseService().addItem(itemName);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$itemName hinzugefügt!')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$itemName hinzugefügt!')),
+          );
+        }
       }
+    } on PlatformException catch (e) {
+      print("Fehler beim Empfang der Extras: ${e.message}");
     }
   }
 
@@ -106,8 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Padding(
                 padding: EdgeInsets.all(20.0),
                 child: Text(
-                  'Deine Liste ist leer. Füge Dinge hinzu, indem du sagst "Okay Google, ...!"',
+                  'Deine Liste ist leer. Sag zum Beispiel:\n"Okay Google, füge Hafermilch zu Shopliste hinzu!"',
                   textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
               ),
             );
@@ -171,27 +158,4 @@ class DatabaseService {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
-
-  List<ShoppingItem> _itemsFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return ShoppingItem(
-        name: data['name'] ?? 'null',
-        createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      );
-    }).toList();
-  }
-
-  Stream<List<ShoppingItem>> get shoppingList {
-    return _shoppingList
-        .orderBy('createdAt', descending: false)
-        .snapshots()
-        .map(_itemsFromSnapshot);
-  }
-}
-
-class ShoppingItem {
-  final String name;
-  final DateTime createdAt;
-  ShoppingItem({required this.name, required this.createdAt});
 }

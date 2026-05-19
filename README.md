@@ -1,4 +1,4 @@
-# einkaufsliste
+# shopliste
 
 Google Assistant activated shopping list
 

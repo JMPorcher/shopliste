@@ -9,19 +9,12 @@ plugins {
 }
 
 val keystoreProperties = Properties()
-val keysFolder = File(System.getProperty("user.home"), "Documents/AndroidKeys/Einkaufsliste/android")
+val keysFolder = File(System.getProperty("user.home"), "Documents/AndroidKeys/Shopliste/android")
 
 val keystorePropertiesFile = File(keysFolder, "key.properties")
 
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-    println("✅ Key-Properties erfolgreich geladen aus: ${keystorePropertiesFile.absolutePath}")
-} else {
-    println("❌ FEHLER: key.properties nicht gefunden in: ${keystorePropertiesFile.absolutePath}")
-}
-
 android {
-    namespace = "de.jmporcher.einkaufsliste"
+    namespace = "de.jmporcher.shopliste"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -35,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "de.jmporcher.einkaufsliste"
+        applicationId = "de.jmporcher.shopliste"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

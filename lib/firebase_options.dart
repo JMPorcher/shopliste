@@ -56,8 +56,8 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyAIyQ2r2MyQ3jeyH8B7RskoB4faWUYv91k',
     appId: '1:434816386406:android:e9181be8ac0a36885ff4a7',
     messagingSenderId: '434816386406',
-    projectId: 'einkaufsliste-4a586',
-    storageBucket: 'einkaufsliste-4a586.firebasestorage.app',
+    projectId: 'shopliste-4a586',
+    storageBucket: 'shopliste-4a586.firebasestorage.app',
   );
 
 }

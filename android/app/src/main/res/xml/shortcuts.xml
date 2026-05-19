@@ -3,9 +3,9 @@
     <capability android:name="actions.intent.ADD_ITEM_TO_LIST">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="de.jmporcher.einkaufsliste"
-            android:targetClass="de.jmporcher.einkaufsliste.MainActivity">
-            <data android:scheme="einkaufsliste" android:host="add" />
+            android:targetPackage="de.jmporcher.shopliste"
+            android:targetClass="de.jmporcher.shopliste.MainActivity">
+            <data android:scheme="shopliste" android:host="add" />
             <parameter
                 android:name="item.name"
                 android:key="item"/>
